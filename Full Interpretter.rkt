@@ -796,7 +796,9 @@
 
 (define (mult-and left-hand right-hand env)
   (cases expval left-hand
-    (num-val (num) (num-val (* num (expval->val (value-of-factor right-hand env)))))
+    (num-val (num) (num-val (if (= num 0)
+                                0
+                                (* num (expval->val (value-of-factor right-hand env))))))
     (bool-val (bool) (if (eqv? #f bool)
                          (bool-val #f)
                           (value-of-factor right-hand env)))
@@ -1084,36 +1086,14 @@
 ; ----------------------------------- TEST ---------------------------------------
 
 ;lexer test
-(define test-program (open-input-file "./in4.txt"))
 (define lex-this (lambda (lexer input) (lambda () (lexer input))))
-(define my-lexer (lex-this simple-python-lexer test-program))
-(define (lex-all my-lexer)
-  (let ((lex-res (my-lexer)))
-    (if (equal? 'EOF lex-res)
-        (list lex-res)
-        (cons lex-res (lex-all my-lexer)))))
-
-(define test-lex-output (open-output-file "./testlex.txt" #:exists 'replace))
-(pretty-print (lex-all my-lexer) test-lex-output)
-(close-output-port test-lex-output)
-
-;parser test
-
 (define parse (lambda (program)
                 (let ((my-lexer (lex-this simple-python-lexer program)))
                   (simple-python-parser my-lexer))))
-(define test-program-2 (open-input-file "./in4.txt"))
-(define test-lex-output-2 (open-output-file "./testparse.txt" #:exists 'replace))
-(pretty-print (parse test-program-2) test-lex-output-2)
-(close-output-port test-lex-output-2)
-
-;test
-
 (define (evaluate address)
   (value-of-program (parse (open-input-file address))))
-
-(define program "./in4.txt")
+(define program "./in1.txt")
 (define result (evaluate program))
-(define test-output (open-output-file "./testresult13.txt" #:exists 'replace))
+(define test-output (open-output-file "./out1.txt" #:exists 'replace))
 (pretty-print result test-output)
 (close-output-port test-output)
